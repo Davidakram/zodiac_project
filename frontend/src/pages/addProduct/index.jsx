@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import {
   Button,
   TextField,
-  Container,
   Typography,
   Grid,
   MenuItem,
+  Autocomplete,
 } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -15,6 +15,8 @@ import { DatePicker } from "@mui/x-date-pickers";
 import "../../components/styles/addProduct.css";
 import axios from "axios";
 import { toast } from "react-toastify";
+import styled from "@emotion/styled";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 const initialValues = {
   product_type: "",
@@ -24,6 +26,8 @@ const initialValues = {
   product_count: "",
   product_size: "",
   nicotine_percentage: "",
+  mtl_or_dl: "",
+
   date_added: null,
 };
 
@@ -46,9 +50,25 @@ const ProductSchema = Yup.object().shape({
 });
 
 const ProductForm = () => {
+  const history = useHistory();
+  const ModernButton = styled(Button)({
+    background: "linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)",
+    border: 0,
+    borderRadius: 3,
+    boxShadow: "0 3px 5px 2px rgba(255, 105, 135, .3)",
+    color: "white",
+    height: 48,
+    padding: "0 30px",
+    "&:hover": {
+      backgroundColor: "rgba(255, 152, 0, 0.85)",
+    },
+  });
+  const [productNames, setProductNames] = useState([]);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const handleSubmit = async (values, { setSubmitting }) => {
     setIsSubmitting(true);
+    console.log(values);
     try {
       const formattedData = {
         ...values,
@@ -59,6 +79,7 @@ const ProductForm = () => {
         formattedData
       );
       toast.success("Product added successfully");
+      history.push("/products");
     } catch (error) {
       toast.error("Error adding Product");
       console.error("Error sending data:", error);
@@ -66,9 +87,28 @@ const ProductForm = () => {
     setIsSubmitting(false);
   };
 
+  const getProductNames = async () => {
+    try {
+      const response = await axios.get(
+        "http://127.0.0.1:5000/api/productsnames"
+      );
+      setProductNames(response.data.products_names_list);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    getProductNames();
+  }, []);
+
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h4" component="h1" gutterBottom>
+    <div className="container border rounded mt-5 p-3">
+      <Typography
+        variant="h4"
+        component="h1"
+        gutterBottom
+        className="addProductTitle"
+      >
         Add Product
       </Typography>
       <Formik
@@ -77,30 +117,11 @@ const ProductForm = () => {
         onSubmit={handleSubmit}
       >
         {({ errors, touched, handleChange, handleBlur }) => (
-          <Form>
+          <Form className="addProductForm">
             <Grid container spacing={2}>
               {Object.keys(initialValues).map((key) => (
                 <Grid item xs={12} key={key}>
-                  {key === "product_size" ? (
-                    <Field
-                      as={TextField}
-                      select
-                      name={key}
-                      label="Product Size"
-                      fullWidth
-                      variant="outlined"
-                      error={errors[key] && touched[key]}
-                      helperText={touched[key] && errors[key]}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                    >
-                      <MenuItem value="30 ml">30 ml</MenuItem>
-
-                      <MenuItem value="60 ml">60 ml</MenuItem>
-                      <MenuItem value="100 ml">100 ml</MenuItem>
-                      <MenuItem value="150 ml">150 ml</MenuItem>
-                    </Field>
-                  ) : key === "date_added" ? (
+                  {key === "date_added" ? (
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <Field fullWidth name="date_added">
                         {({ field }) => (
@@ -123,25 +144,42 @@ const ProductForm = () => {
                         )}
                       </Field>
                     </LocalizationProvider>
-                  ) : key === "nicotine_percentage" ? (
-                    <Field
-                      as={TextField}
-                      select
-                      name={key}
-                      label="Nicotine Percentage"
-                      fullWidth
-                      variant="outlined"
-                      error={errors[key] && touched[key]}
-                      helperText={touched[key] && errors[key]}
-                      onChange={handleChange}
+                  ) : key === "product_name" ? (
+                    <Autocomplete
+                      freeSolo
+                      options={productNames}
+                      getOptionLabel={(option) => {
+                        // Check if the option is a string; if so, return it directly. If it's an object, return its product_name.
+                        return typeof option === "string"
+                          ? option
+                          : option.product_name;
+                      }}
+                      onChange={(event, newValue) => {
+                        handleChange({
+                          target: {
+                            name: "product_name",
+                            value: newValue
+                              ? typeof newValue === "string"
+                                ? newValue
+                                : newValue.product_name
+                              : "",
+                          },
+                        });
+                      }}
                       onBlur={handleBlur}
-                    >
-                      {[0, 3, 6, 9, 12, 18].map((value) => (
-                        <MenuItem key={value} value={value}>
-                          {value}
-                        </MenuItem>
-                      ))}
-                    </Field>
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="outlined"
+                          label="Product Name"
+                          name="product_name"
+                          error={errors.product_name && touched.product_name} // Update error based on product_name field
+                          helperText={
+                            touched.product_name && errors.product_name
+                          } // Update helper text based on product_name field
+                        />
+                      )}
+                    />
                   ) : (
                     <Field
                       as={TextField}
@@ -152,30 +190,65 @@ const ProductForm = () => {
                       }
                       fullWidth
                       variant="outlined"
+                      select={
+                        key === "product_type" ||
+                        key === "product_size" ||
+                        key === "mtl_or_dl" ||
+                        key === "nicotine_percentage"
+                      }
                       error={errors[key] && touched[key]}
                       helperText={touched[key] && errors[key]}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                    />
+                    >
+                      {[
+                        "product_size",
+                        "product_type",
+                        "mtl_or_dl",
+                        "nicotine_percentage",
+                      ].includes(key) &&
+                        getSelectMenuItems(key).map((option) => (
+                          <MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                          </MenuItem>
+                        ))}
+                    </Field>
                   )}
                 </Grid>
               ))}
               <Grid item xs={12}>
-                <Button
+                <ModernButton
                   type="submit"
                   variant="contained"
                   color="primary"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Loading" : "Submit"}
-                </Button>
+                </ModernButton>
               </Grid>
             </Grid>
           </Form>
         )}
       </Formik>
-    </Container>
+    </div>
   );
 };
 
+function getSelectMenuItems(key) {
+  const options = {
+    product_type: [
+      "Liquid",
+      "Tank",
+      "Pod",
+      "Mod",
+      "Battery",
+      "Disposable",
+      "Charger",
+      "Coil",
+      "Cotton",
+    ],
+    product_size: ["30 ml", "60 ml", "100 ml", "150 ml"],
+    mtl_or_dl: ["Mtl", "Dl"],
+    nicotine_percentage: [0, 3, 6, 9, 12, 18],
+  };
+  return options[key].map((value) => ({ value, label: value }));
+}
 export default ProductForm;

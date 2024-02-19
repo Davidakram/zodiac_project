@@ -11,6 +11,8 @@ const ProductsPage = () => {
   const columns = [
     { field: "product_name", headerName: "Name", flex: 0.5, editable: true },
     { field: "product_type", headerName: "Type", flex: 0.5, editable: true },
+    { field: "mtl_or_dl", headerName: "Mtl&Dl", flex: 0.5, editable: true },
+
     { field: "product_size", headerName: "Size", flex: 0.5, editable: true },
     {
       field: "nicotine_percentage",

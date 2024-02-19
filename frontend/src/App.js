@@ -6,6 +6,8 @@ import ProductForm from "./pages/addProduct";
 import "react-toastify/dist/ReactToastify.css";
 import { BrowserRouter } from "react-router-dom/cjs/react-router-dom.min";
 import ProductsPage from "./pages/productsAvailabe";
+import SellingPage from "./pages/sellingPage";
+import NavBar from "./components/navbar";
 
 function App() {
   return (
@@ -14,9 +16,11 @@ function App() {
       <BrowserRouter>
         <div className="content">
           {" "}
+          <NavBar />
           <Switch>
             <Route exact path="/add_product" component={ProductForm} />
             <Route exact path="/products" component={ProductsPage} />
+            <Route exact path="/" component={SellingPage} />
           </Switch>
         </div>
       </BrowserRouter>

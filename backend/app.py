@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta,date
 from flask_restful import Resource, Api
 import os
 import json
@@ -34,6 +34,7 @@ class Product(db.Model):
     product_count = db.Column(db.Integer, nullable=False)
     product_size = db.Column(db.String(255), nullable=True)
     nicotine_percentage = db.Column(db.String, nullable=True)
+    mtl_or_dl=db.Column(db.String(3), nullable=True)
     date_added = db.Column(db.Date, default=datetime.utcnow)
 
 class Sale(db.Model):
@@ -53,7 +54,9 @@ class Sale(db.Model):
 class ProductsProccess(Resource):
     def post(self):
         data = request.get_json()
+
         product_type = data.get('product_type')
+        mtl_or_dl=data.get('mtl_or_dl')
         original_price = data.get('original_price')
         selling_price = data.get('selling_price')
         product_name = data.get('product_name')
@@ -70,7 +73,8 @@ class ProductsProccess(Resource):
             product_count=product_count,
             product_size=product_size,
             nicotine_percentage=nicotine_percentage,
-            date_added=date_added
+            date_added=date_added,
+            mtl_or_dl=mtl_or_dl,
         )
 
         # Add the new Product to the database session
@@ -89,6 +93,7 @@ class ProductsProccess(Resource):
                 'product_name': product.product_name,
                 'product_type': product.product_type,
                 'product_size': product.product_size,
+                'mtl_or_dl':product.mtl_or_dl,
                 'nicotine_percentage': product.nicotine_percentage,
                 'original_price': float(product.original_price),  
                 'selling_price': float(product.selling_price),    
@@ -112,6 +117,8 @@ class ProductsModifications(Resource):
         product.product_count = data.get('total_count', product.product_count)
         product.product_size = data.get('product_size', product.product_size)
         product.nicotine_percentage = data.get('nicotine_percentage', product.nicotine_percentage)
+        product.mtl_or_dl = data.get('mtl_or_dl', product.mtl_or_dl)
+
         try: 
             db.session.commit()
             return {"message": "Product updated successfully"}, 200
@@ -120,9 +127,86 @@ class ProductsModifications(Resource):
 
         
 
+class ProductSearchResource(Resource):
+    def post(self):
+        search_criteria = request.get_json()
+
+        if all(value is None for value in search_criteria.values()):
+            products = Product.query.all()
+        else:
+            query = Product.query
+            for field, value in search_criteria.items():
+                if value:
+                    query = query.filter(getattr(Product, field).ilike(f"%{value}%"))
+
+            products = query.all()
+        products_list = []
+        for product in products:
+                products_list.append({
+                "id":product.product_id,
+                'product_name': product.product_name,
+                'product_type': product.product_type,
+                'product_size': product.product_size,
+                'mtl_or_dl':product.mtl_or_dl,
+                'nicotine_percentage': product.nicotine_percentage,
+                'selling_price': float(product.selling_price),    
+                'total_count': product.product_count
+            })
+        # Convert the products to a JSON response
+        return {'products': products_list}, 200
     
+class SellingProducts(Resource):
+    def post(self,id):
+        try:
+            product = Product.query.filter_by(product_id=id).first()
+            if product is None:
+                return {"message": "Product not found"},400
+            if product.product_count>0:
+                product.product_count-=1
+            else:
+                return {"message":"Product out of stock"},400
+
+            sale=Sale(product_id=id,quantity_sold=1,sale_date=datetime.utcnow(), total_sale_amount=product.selling_price)
+            db.session.add(sale)
+            db.session.commit()
+            return{"message":"Product was sold Successfully "},200
+        except Exception as e:
+            db.session.rollback()
+            return {"message":str(e)},500
 
 
+class TodaySales(Resource):
+    def get(self):
+        current_date = date.today()
+        sales = Sale.query.filter(Sale.sale_date == current_date).all()
+        formatted_sales = []
+        for sale in sales:
+            product_name=Product.query.get(sale.product_id).product_name
+            formatted_sale={
+                "sale_id":sale.sale_id,
+                "product_name":product_name,
+                "quantity_sold":sale.quantity_sold,
+                "total_price":float(sale.total_sale_amount),
+            }
+            formatted_sales.append(formatted_sale)
+        return{"sales":formatted_sales},200
+    
+class ProductsNames(Resource):
+    def get(self):
+        products=Product.query.all()
+        products_names_list=[]
+        for product in products:
+            formmatted_product={
+                "id":product.product_id,
+                "product_name":product.product_name
+            }
+            products_names_list.append(formmatted_product)
+        return {"products_names_list":products_names_list},200
 # apis
+    
 api.add_resource(ProductsProccess,"/api/productsproccess")
 api.add_resource(ProductsModifications,"/api/productmodify/<int:product_id>")
+api.add_resource(ProductSearchResource,"/api/productsearch")
+api.add_resource(SellingProducts,"/api/selling/<int:id>")
+api.add_resource(TodaySales,"/api/sales")
+api.add_resource(ProductsNames,"/api/productsnames")
