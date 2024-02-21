@@ -49,8 +49,7 @@ const ProductsPage = () => {
         newRow
       );
 
-      // Update the state if necessary. In this case, the DataGrid will automatically handle the state update.
-      toast.success("Edit successful");
+      toast.success("Product was updated successfully");
       return newRow; // Important: Return the updated row data to confirm the update.
     } catch (error) {
       console.error("Failed to update product:", error);
@@ -66,8 +65,13 @@ const ProductsPage = () => {
         const response = await axios.get(
           "http://127.0.0.1:5000/api/productsproccess"
         );
+        const formattedProducts = response.data.products.map((product) => {
+          return Object.fromEntries(
+            Object.entries(product).map(([key, value]) => [key, value || "-"])
+          );
+        });
         setProducts(
-          response.data.products.map((product) => ({
+          formattedProducts.map((product) => ({
             ...product,
             id: product.id,
           }))

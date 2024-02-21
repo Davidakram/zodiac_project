@@ -181,16 +181,44 @@ class TodaySales(Resource):
         sales = Sale.query.filter(Sale.sale_date == current_date).all()
         formatted_sales = []
         for sale in sales:
-            product_name=Product.query.get(sale.product_id).product_name
+            product=Product.query.get(sale.product_id)
             formatted_sale={
                 "sale_id":sale.sale_id,
-                "product_name":product_name,
+                "product_name":product.product_name,
+                "product_type":product.product_type,
+                "product_size":product.product_size,
+                "nicotine_percentage":product.nicotine_percentage,
+                "mtl_or_dl":product.mtl_or_dl,
                 "quantity_sold":sale.quantity_sold,
                 "total_price":float(sale.total_sale_amount),
             }
             formatted_sales.append(formatted_sale)
         return{"sales":formatted_sales},200
-    
+
+class GetSalesByDate(Resource):
+    def post(self):
+        data=request.get_json()
+        start_date=data.get('startDate')
+        end_date=data.get('endDate')
+ 
+        sales=Sale.query.filter(Sale.sale_date>=start_date,Sale.sale_date<=end_date).all()
+        formatted_sales=[]
+        for sale in sales:
+            product=Product.query.get(sale.product_id)
+            formatted_sale={
+                "sale_id":sale.sale_id,
+                "product_name":product.product_name,
+                "product_type":product.product_type,
+                "product_size":product.product_size,
+                "nicotine_percentage":product.nicotine_percentage,
+                "mtl_or_dl":product.mtl_or_dl,
+                "quantity_sold":sale.quantity_sold,
+                "total_price":float(sale.total_sale_amount),
+                "sale_date": sale.sale_date.strftime('%Y-%m-%d')
+                                        
+                                        }
+            formatted_sales.append(formatted_sale)
+        return {"sales":formatted_sales},200    
 class ProductsNames(Resource):
     def get(self):
         products=Product.query.all()
@@ -210,3 +238,4 @@ api.add_resource(ProductSearchResource,"/api/productsearch")
 api.add_resource(SellingProducts,"/api/selling/<int:id>")
 api.add_resource(TodaySales,"/api/sales")
 api.add_resource(ProductsNames,"/api/productsnames")
+api.add_resource(GetSalesByDate,"/api/getsalesbydate")

@@ -35,8 +35,13 @@ const SellingPage = () => {
         "http://127.0.0.1:5000/api/productsearch",
         searchCriteria
       );
+      const formattedProducts = response.data.products.map((product) => {
+        return Object.fromEntries(
+          Object.entries(product).map(([key, value]) => [key, value || "-"])
+        );
+      });
       setProducts(
-        response.data.products.map((product) => ({
+        formattedProducts.map((product) => ({
           ...product,
           id: product.id,
         }))
@@ -49,9 +54,13 @@ const SellingPage = () => {
   const fetchSalesForToday = async () => {
     try {
       const response = await axios.get("http://127.0.0.1:5000/api/sales");
-      console.log(response);
+      const formattedSales = response.data.sales.map((sale) => {
+        return Object.fromEntries(
+          Object.entries(sale).map(([key, value]) => [key, value || "-"])
+        );
+      });
       setSales(
-        response.data.sales.map((sales) => ({
+        formattedSales.map((sales) => ({
           ...sales,
           id: sales.sale_id,
         }))
@@ -66,10 +75,19 @@ const SellingPage = () => {
   }, [loading]);
 
   const Salescolumns = [
-    { field: "sale_id", headerName: "Sale ID", flex: 0.5 },
     { field: "product_name", headerName: "Product Name", flex: 1 },
-    { field: "quantity_sold", headerName: "Quantity Sold", flex: 0.5 },
-    { field: "total_price", headerName: "Total Price", flex: 0.5 },
+    { field: "product_type", headerName: "Type", flex: 1 },
+    { field: "mtl_or_dl", headerName: "Mtl&Dl", flex: 1 },
+
+    { field: "product_size", headerName: "Size", flex: 1 },
+    {
+      field: "nicotine_percentage",
+      headerName: "Nicotine %",
+      flex: 1,
+    },
+
+    { field: "quantity_sold", headerName: "Quantity Sold", flex: 1 },
+    { field: "total_price", headerName: "Total Price", flex: 1 },
   ];
   // Function to handle selling a product
   const handleSellProduct = (product) => {
@@ -79,7 +97,6 @@ const SellingPage = () => {
 
   // ////////////////////////////////////////////Function to confirm selling a product
   const confirmSellProduct = async () => {
-    console.log("Selling product:", selectedProduct);
     setLoading(true);
     try {
       const response = await axios.post(
@@ -101,7 +118,7 @@ const SellingPage = () => {
     sales.forEach((sale) => {
       totalMoney += sale.total_price;
     });
-    return totalMoney.toFixed(2); // toFixed(2) is used to display the total with 2 decimal places
+    return totalMoney.toFixed(0); // toFixed(2) is used to display the total with 2 decimal places
   };
 
   // Function to toggle showing/hiding the sales table
@@ -118,7 +135,6 @@ const SellingPage = () => {
       ...prevState,
       [name]: value,
     }));
-    console.log(value);
   };
   // useEffect to fetch products when component mounts
   useEffect(() => {
@@ -134,26 +150,26 @@ const SellingPage = () => {
 
   // Define columns for products table
   const columns = [
-    { field: "product_name", headerName: "Name", flex: 0.5 },
-    { field: "product_type", headerName: "Type", flex: 0.5 },
-    { field: "mtl_or_dl", headerName: "Mtl&Dl", flex: 0.5 },
+    { field: "product_name", headerName: "Name", flex: 1 },
+    { field: "product_type", headerName: "Type", flex: 1 },
+    { field: "mtl_or_dl", headerName: "Mtl&Dl", flex: 1 },
 
-    { field: "product_size", headerName: "Size", flex: 0.5 },
+    { field: "product_size", headerName: "Size", flex: 1 },
     {
       field: "nicotine_percentage",
       headerName: "Nicotine %",
-      flex: 0.5,
+      flex: 1,
     },
 
     {
       field: "selling_price",
       headerName: "Selling Price",
-      flex: 0.5,
+      flex: 1,
     },
     {
       field: "total_count",
       headerName: "Total Count",
-      flex: 0.5,
+      flex: 1,
     },
     {
       field: "action",

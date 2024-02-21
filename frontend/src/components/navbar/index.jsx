@@ -93,6 +93,9 @@ const NavBar = () => {
             <MenuItem onClick={handleClose} component={Link} to="/products">
               Products Available
             </MenuItem>
+            <MenuItem onClick={handleClose} component={Link} to="/getsales">
+              Sales by Date
+            </MenuItem>
           </Menu>
           {/* Logout Button */}
           {/* <Button color="inherit" onClick={handleLogout}>

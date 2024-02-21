@@ -72,8 +72,9 @@ const ProductForm = () => {
     try {
       const formattedData = {
         ...values,
-        date_added: new Date(values.date_added).toISOString().split("T")[0],
+        date_added: new Date(values.date_added).toLocaleDateString("en-US"),
       };
+      console.log(formattedData);
       const response = await axios.post(
         "http://127.0.0.1:5000/api/productsproccess",
         formattedData
