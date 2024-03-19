@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-
+import "../../components/styles/sellingPage.css";
 import { DatePicker } from "@mui/x-date-pickers";
-import { Box, Typography } from "@mui/material";
+import { Box, ThemeProvider, Typography, createTheme } from "@mui/material";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
@@ -11,6 +11,45 @@ import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 const GetSales = () => {
   const [dates, setDates] = useState({ startDate: null, endDate: null });
   const [sales, setSales] = useState([]);
+  const theme = createTheme({
+    components: {
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            color: "white", // Makes label text white
+            "&.Mui-focused": {
+              color: "white", // Keeps text white on focus
+            },
+          },
+        },
+      },
+      MuiInput: {
+        styleOverrides: {
+          root: {
+            color: "white",
+          },
+          input: {
+            color: "white", // Ensures the text you type is white
+          },
+        },
+      },
+      MuiOutlinedInput: {
+        styleOverrides: {
+          input: {
+            color: "white", // Ensures the text you type is white
+          },
+        },
+      },
+      MuiAutocomplete: {
+        styleOverrides: {
+          inputRoot: {
+            color: "white",
+          },
+        },
+      },
+      // Add overrides for other components as needed
+    },
+  });
 
   const handleGetSales = async () => {
     const formattedDates = {
@@ -38,7 +77,6 @@ const GetSales = () => {
           id: sales.sale_id,
         }))
       );
-      console.log(response);
     } catch (e) {
       toast.error("Error while getting sales , please try again");
       console.log(e);
@@ -78,10 +116,17 @@ const GetSales = () => {
     return totalMoney.toFixed(0);
   };
 
+  const calculateTotalProfit = (sales) => {
+    let totalProfit = 0;
+    sales.forEach((sale) => {
+      totalProfit += sale.product_profit;
+    });
+    return totalProfit.toFixed(0); // toFixed(2) is used to display the total with 2 decimal places
+  };
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <div
-        className="container border rounded mt-3"
+        className="container border rounded mt-5"
         style={{
           border: "1px solid #ccc",
           padding: "20px",
@@ -92,26 +137,31 @@ const GetSales = () => {
           sx={{ display: "flex", justifyContent: "space-evenly", gap: "20px" }}
         >
           <div>
-            <DatePicker
-              label="Start Date"
-              inputFormat="MM/dd/yyyy"
-              value={dates.startDate}
-              onChange={(newValue) => handleDateChange("startDate", newValue)}
-            />
+            <ThemeProvider theme={theme}>
+              <DatePicker
+                label="Start Date"
+                inputFormat="MM/dd/yyyy"
+                value={dates.startDate}
+                onChange={(newValue) => handleDateChange("startDate", newValue)}
+              />
+            </ThemeProvider>
           </div>
           <div>
-            <DatePicker
-              label="End Date"
-              inputFormat="MM/dd/yyyy"
-              value={dates.endDate}
-              onChange={(newValue) => handleDateChange("endDate", newValue)}
-            />
+            <ThemeProvider theme={theme}>
+              <DatePicker
+                label="End Date"
+                inputFormat="MM/dd/yyyy"
+                value={dates.endDate}
+                onChange={(newValue) => handleDateChange("endDate", newValue)}
+              />
+            </ThemeProvider>
           </div>
         </Box>
         <div className="w-100 text-center">
           <button
             type="button"
-            className="btn btn-outline-primary mt-3"
+            style={{ color: "white" }}
+            className="btn add-button mt-3"
             disabled={isButtonDisabled}
             onClick={handleGetSales}
           >
@@ -121,20 +171,83 @@ const GetSales = () => {
         {sales.length > 0 ? (
           <>
             {" "}
-            <DataGrid
-              rows={sales}
-              columns={Salescolumns}
-              pageSize={5}
-              components={{ Toolbar: GridToolbar }}
-              sx={{ marginTop: 3 }}
-            />{" "}
-            <Typography variant="h6" gutterBottom>
+            <Box
+              mt={3}
+              sx={{
+                "& .MuiDataGrid-root": {
+                  border: "none",
+                  color: "#424242",
+                },
+                "& .MuiDataGrid-cell": {
+                  borderBottom: "1px solid #e0e0e0",
+                  color: "#424242",
+                  fontSize: "14px",
+                },
+                "& .MuiDataGrid-columnHeaderTitle": {
+                  color: "white",
+                  fontWeight: "bold",
+                  fontSize: "18px",
+                },
+                "& .MuiDataGrid-columnHeaders": {
+                  backgroundColor: "#f5f5f5",
+                  borderBottom: "2px solid #e0e0e0",
+                },
+                "& .MuiDataGrid-virtualScroller": {
+                  backgroundColor: "#fafafa",
+                },
+                "& .MuiDataGrid-footerContainer": {
+                  borderTop: "1px solid #e0e0e0",
+                  backgroundColor: "#f5f5f5",
+                },
+                "& .MuiCheckbox-root": {
+                  color: `#757575 !important`,
+                },
+                "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
+                  color: `white !important`,
+                },
+                "& .css-az8st9-MuiDataGrid-root.MuiDataGrid-autoHeight": {
+                  boxShadow: "0px 0px 25px 25px #7ffaffbd",
+                },
+                "& .css-az8st9-MuiDataGrid-root .MuiDataGrid-withBorderColor ":
+                  {
+                    backgroundColor: "inherit !important",
+                  },
+                "& .css-s1v7zr-MuiDataGrid-virtualScrollerRenderZone": {
+                  backgroundColor: " rgba(0, 0, 0, 0.87) !important",
+                },
+                "& .css-az8st9-MuiDataGrid-root .MuiDataGrid-cellContent": {
+                  color: "white !important",
+                },
+                "& .css-de9k3v-MuiDataGrid-selectedRowCount": {
+                  color: "white !important",
+                },
+                "& .css-78c6dr-MuiToolbar-root-MuiTablePagination-toolbar": {
+                  color: "white !important",
+                },
+              }}
+            >
+              <DataGrid
+                rows={sales}
+                columns={Salescolumns}
+                pageSize={5}
+                components={{ Toolbar: GridToolbar }}
+              />{" "}
+            </Box>
+            <Typography
+              variant="h6"
+              gutterBottom
+              mt={3}
+              sx={{ color: "white" }}
+            >
               Total Money Collected during this Duration: EG{" "}
               {calculateTotalMoney(sales)}
             </Typography>
+            <Typography variant="h6" gutterBottom sx={{ color: "white" }}>
+              Total Profit Collected : EG {calculateTotalProfit(sales)}
+            </Typography>
           </>
         ) : (
-          <div className="mt-5 w-100 text-center">
+          <div className="mt-5 w-100 text-center text-light">
             No Sales for selected duration
           </div>
         )}

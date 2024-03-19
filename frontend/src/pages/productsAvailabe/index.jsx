@@ -33,6 +33,12 @@ const ProductsPage = () => {
       editable: true,
     },
     {
+      field: "dealer",
+      headerName: "Dealer Name",
+      flex: 0.5,
+      editable: true,
+    },
+    {
       field: "total_count",
       headerName: "Total Count",
       flex: 0.5,
@@ -91,9 +97,16 @@ const ProductsPage = () => {
   }
 
   return (
-    <Box sx={{ margin: "20px auto", width: "90%" }}>
+    <Box
+      sx={{
+        margin: "20px auto",
+        width: "90%",
+        color: "white",
+        textAlign: "center",
+      }}
+    >
       <Grid container spacing={3}>
-        <Grid item xs={12}>
+        <Grid item xs={12} mb={5}>
           <h4>Products Available</h4>
         </Grid>
         <Grid item xs={12}>
@@ -110,7 +123,7 @@ const ProductsPage = () => {
                 fontSize: "14px",
               },
               "& .MuiDataGrid-columnHeaderTitle": {
-                color: "#424242",
+                color: "white",
                 fontWeight: "bold",
                 fontSize: "18px",
               },
@@ -129,7 +142,25 @@ const ProductsPage = () => {
                 color: `#757575 !important`,
               },
               "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-                color: `#424242 !important`,
+                color: `white !important`,
+              },
+              "& .css-az8st9-MuiDataGrid-root.MuiDataGrid-autoHeight": {
+                boxShadow: "0px 0px 25px 25px #7ffaffbd",
+              },
+              "& .css-az8st9-MuiDataGrid-root .MuiDataGrid-withBorderColor ": {
+                backgroundColor: "inherit !important",
+              },
+              "& .css-s1v7zr-MuiDataGrid-virtualScrollerRenderZone": {
+                backgroundColor: " rgba(0, 0, 0, 0.87) !important",
+              },
+              "& .css-az8st9-MuiDataGrid-root .MuiDataGrid-cellContent": {
+                color: "white !important",
+              },
+              "& .css-de9k3v-MuiDataGrid-selectedRowCount": {
+                color: "white !important",
+              },
+              "& .css-78c6dr-MuiToolbar-root-MuiTablePagination-toolbar": {
+                color: "white !important",
               },
             }}
           >
