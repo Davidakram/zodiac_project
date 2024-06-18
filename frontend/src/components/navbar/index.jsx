@@ -4,53 +4,27 @@ import {
   Toolbar,
   IconButton,
   Typography,
-  Button,
   Menu,
   MenuItem,
-  Box,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Link } from "react-router-dom";
-import {
-  useHistory,
-  useLocation,
-} from "react-router-dom/cjs/react-router-dom.min";
-import Cookies from "js-cookie";
-import UserContext from "../context";
+import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
+import { useUser } from "../context";
 
 const NavBar = () => {
-  const history = useHistory();
-  const { userRole, setUserRole } = React.useContext(UserContext);
+  const { user, logout } = useUser();
   const [show, setShow] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => {
-    
     setAnchorEl(null);
   };
-  const logout = () => {
-    setUserRole(null);
-    Cookies.remove("zodiac_token");
-    history.push("/login");
-  };
 
-  //   const handleLogout = () => {
-  //     const auth = getAuth();
-
-  //     signOut(auth)
-  //       .then(() => {
-  //         history.push("/login");
-  //         Cookies.removzodiac_tokene("User_Id");
-  //       })
-  //       .catch((error) => {
-  //         console.error("Error during logout:", error);
-  //       });
-  //   };
   const location = useLocation();
   useEffect(() => {
     if (location.pathname === "/login") {
@@ -61,7 +35,8 @@ const NavBar = () => {
   }, [location.pathname]);
 
   return (
-    show && (
+    show &&
+    user && (
       <AppBar
         position="static"
         sx={{ background: "transparent", color: "white", border: "none" }}
@@ -80,42 +55,60 @@ const NavBar = () => {
           >
             <MenuIcon />
           </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorEl}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={open}
-              onClose={handleClose}
+          <Menu
+            id="menu-appbar"
+            anchorEl={anchorEl}
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            open={open}
+            onClose={handleClose}
+          >
+            <MenuItem
+              onClick={handleClose}
+              component={Link}
+              to="/add_product"
+              className={user.user_name === "Youssef" ? "d-block" : "d-none"}
             >
-              <MenuItem
-                onClick={handleClose}
-                component={Link}
-                to="/add_product"
-              >
-                Add Product
-              </MenuItem>
-              <MenuItem onClick={handleClose} component={Link} to="/">
-                Sales Management
-              </MenuItem>
-              <MenuItem onClick={handleClose} component={Link} to="/products">
-                Products Available
-              </MenuItem>
-              <MenuItem onClick={handleClose} component={Link} to="/getsales">
-                Sales by Date
-              </MenuItem>
-              <MenuItem onClick={logout} component={Link} to="/login">
-                Logout
-              </MenuItem>
-            </Menu>
-          
+              Add Product
+            </MenuItem>
+            <MenuItem onClick={handleClose} component={Link} to="/">
+              Sales Management
+            </MenuItem>
+            <MenuItem
+              onClick={handleClose}
+              component={Link}
+              to="/products"
+              className={user.user_name === "Youssef" ? "d-block" : "d-none"}
+            >
+              Products Available
+            </MenuItem>
+            <MenuItem
+              onClick={handleClose}
+              component={Link}
+              to="/getsales"
+              className={user.user_name === "Youssef" ? "d-block" : "d-none"}
+            >
+              Sales by Date
+            </MenuItem>
+            <MenuItem
+              onClick={handleClose}
+              component={Link}
+              to="/inventory"
+              className={user.user_name === "Youssef" ? "d-block" : "d-none"}
+            >
+              Inventory
+            </MenuItem>
+            <MenuItem onClick={logout} component={Link} to="/login">
+              Logout
+            </MenuItem>
+          </Menu>
 
           {/* Logout Button */}
           {/* <Button color="inherit" onClick={handleLogout}>

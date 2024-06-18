@@ -4,6 +4,8 @@ from datetime import datetime, timedelta,date
 from flask_restful import Resource, Api
 import jwt
 from flask_cors import CORS
+from sqlalchemy import func
+
 app = Flask(__name__)
 api = Api(app) 
 
@@ -63,6 +65,45 @@ class Login(Resource):
 
         return {'token': token}, 200
     
+
+
+class GroupedProducts(Resource):
+    def get(self):
+        # Perform grouping and counting directly in the database
+        grouped_data = (
+            db.session.query(
+                Product.product_type,
+                Product.product_name,
+                Product.product_size,
+                Product.mtl_or_dl,
+                Product.nicotine_percentage,
+                func.sum(Product.product_count).label('total_count')
+            )
+            .filter(Product.product_count != 0)
+            .group_by(
+                Product.product_type,
+                Product.product_name,
+                Product.product_size,
+                Product.mtl_or_dl,
+                Product.nicotine_percentage
+            )
+            .all()
+        )
+
+        # Convert the query result to a list of dictionaries
+        grouped_products_list = [
+            {
+                "product_type": product.product_type,
+                "product_name": product.product_name,
+                "product_size": product.product_size,
+                "mtl_or_dl": product.mtl_or_dl,
+                "nicotine_percentage": product.nicotine_percentage,
+                "total_count": product.total_count
+            }
+            for product in grouped_data
+        ]
+
+        return {"grouped_products": grouped_products_list}, 200
 
 
 
@@ -169,6 +210,8 @@ class ProductSearchResource(Resource):
             products = query.all()
         products_list = []
         for product in products:
+                if product.product_count ==0:
+                    continue
                 products_list.append({
                 "id":product.product_id,
                 'product_name': product.product_name,
@@ -277,25 +320,40 @@ class GetSalesByDate(Resource):
         return {"sales":formatted_sales},200    
 class ProductsNames(Resource):
     def get(self):
-        products=Product.query.all()
-        products_names_list=[]
-        dealers_names_list=[]
-        for product in products:
-            formmatted_product={
-                "id":product.product_id,
-                "product_name":product.product_name
+        # Query distinct product names
+        distinct_product_names = db.session.query(
+            Product.product_id, Product.product_name
+        ).distinct(Product.product_name).all()
+
+        # Query distinct dealer names
+        distinct_dealer_names = db.session.query(
+            Product.product_id, Product.dealer
+        ).distinct(Product.dealer).all()
+
+        products_names_list = []
+        dealers_names_list = []
+
+        for product in distinct_product_names:
+            formatted_product = {
+                "id": product.product_id,
+                "product_name": product.product_name
             }
-            products_names_list.append(formmatted_product)
-            formmatted_delaer={
-                "id":product.product_id,
-                "dealer":product.dealer
+            products_names_list.append(formatted_product)
+
+        for dealer in distinct_dealer_names:
+            formatted_dealer = {
+                "id": dealer.product_id,
+                "dealer": dealer.dealer
             }
-            dealers_names_list.append(formmatted_delaer)
+            dealers_names_list.append(formatted_dealer)
+
         return {
             "products_names_list": products_names_list,
-            "dealers_names_list": dealers_names_list}, 200
+            "dealers_names_list": dealers_names_list
+        }, 200
 
 api.add_resource(Login,"/api/login")    
+api.add_resource(GroupedProducts,"/api/inventory")
 api.add_resource(ProductsProccess,"/api/productsproccess")
 api.add_resource(ProductsModifications,"/api/productmodify/<int:product_id>")
 api.add_resource(ProductSearchResource,"/api/productsearch")

@@ -6,7 +6,7 @@ import { Link, useHistory } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
 import "../../components/styles/login.css";
-import UserContext from "../../components/context";
+import { useUser } from "../../components/context";
 
 const initialStateInfo = {
   user_name: "",
@@ -14,7 +14,7 @@ const initialStateInfo = {
 };
 
 function LoginPage() {
-  const { setUserRole } = React.useContext(UserContext);
+  const { userlogin } = useUser();
   const [info, setInfo] = useState(initialStateInfo);
 
   const history = useHistory();
@@ -51,10 +51,9 @@ function LoginPage() {
             }
           );
           if (data.token) {
-            Cookies.set("zodiac_token", data.token);
+            userlogin(data.token);
             const { user_name } = jwtDecode(data.token);
-            setUserRole(user_name);
-            
+
             toast.success(
               `Welcome Mr. ${
                 user_name.charAt(0).toUpperCase() +

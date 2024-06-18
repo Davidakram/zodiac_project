@@ -17,8 +17,11 @@ import {
 } from "@mui/material";
 import { toast } from "react-toastify";
 import { Form } from "react-bootstrap";
+import { useUser } from "../../components/context";
 
 const SellingPage = () => {
+  const { user } = useUser();
+
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showSellModal, setShowSellModal] = useState(false);
@@ -62,7 +65,7 @@ const SellingPage = () => {
       const response = await axios.get("http://127.0.0.1:5000/api/sales");
       const formattedSales = response.data.sales.map((sale) => {
         return Object.fromEntries(
-          Object.entries(sale).map(([key, value]) => [key, value || "-"])
+          Object.entries(sale).map(([key, value]) => [key, value])
         );
       });
       setSales(
@@ -158,7 +161,7 @@ const SellingPage = () => {
       console.log(error);
     } finally {
       setLoading(false);
-      setSellPrice("")
+      setSellPrice("");
     }
     setShowSellModal(false);
   };
@@ -166,16 +169,20 @@ const SellingPage = () => {
   const calculateTotalMoney = (sales) => {
     let totalMoney = 0;
     sales.forEach((sale) => {
-      totalMoney += sale.total_price;
+      if (sale.total_price !== 0) {
+        totalMoney += sale.total_price;
+      }
     });
-    return totalMoney.toFixed(0); // toFixed(2) is used to display the total with 2 decimal places
+    return totalMoney.toFixed(0);
   };
   const calculateTotalProfit = (sales) => {
     let totalProfit = 0;
     sales.forEach((sale) => {
-      totalProfit += sale.product_profit;
+      if (sale.product_profit !== 0) {
+        totalProfit += sale.product_profit;
+      }
     });
-    return totalProfit.toFixed(0); // toFixed(2) is used to display the total with 2 decimal places
+    return totalProfit.toFixed(0);
   };
 
   // Function to toggle showing/hiding the sales table
@@ -304,7 +311,13 @@ const SellingPage = () => {
               name="product_size"
             >
               <MenuItem value="">All</MenuItem>
-              {generateSelectOptions(["15 ml","30 ml", "60 ml", "100 ml", "150 ml"])}
+              {generateSelectOptions([
+                "15 ml",
+                "30 ml",
+                "60 ml",
+                "100 ml",
+                "150 ml",
+              ])}
             </Select>
           </FormControl>
         </ThemeProvider>
@@ -318,7 +331,7 @@ const SellingPage = () => {
               name="nicotine_percentage"
             >
               <MenuItem value="">All</MenuItem>
-              {generateSelectOptions([0, 3, 6, 9, 12,16, 18,20,25,30,50])}
+              {generateSelectOptions([0, 3, 6, 9, 12, 16, 18, 20, 25, 30, 50])}
             </Select>
           </FormControl>
         </ThemeProvider>
@@ -429,15 +442,18 @@ const SellingPage = () => {
       </Modal>
 
       {/* Button to toggle showing sales table */}
+
       <Box>
         <div className="w-100 text-center">
-          <button
-            className=" mb-4 mt-5 add-button"
-            type="button"
-            onClick={toggleSalesTable}
-          >
-            {showSalesTable ? "Hide Sales" : "Show Sales"}
-          </button>
+          {user.user_name === "Youssef" && (
+            <button
+              className=" mb-4 mt-5 add-button"
+              type="button"
+              onClick={toggleSalesTable}
+            >
+              {showSalesTable ? "Hide Sales" : "Show Sales"}
+            </button>
+          )}
         </div>
 
         {/* Sales Table */}
