@@ -314,6 +314,7 @@ function getSelectMenuItems(key) {
   const options = {
     product_type: [
       "Liquid",
+      "kit",
       "Tank",
       "Pod",
       "Mod",
@@ -327,9 +328,9 @@ function getSelectMenuItems(key) {
       "Cases",
       "Driptip",
     ],
-    product_size: ["30 ml", "60 ml", "100 ml", "150 ml"],
+    product_size: ["15 ml","30 ml", "60 ml", "100 ml", "150 ml"],
     mtl_or_dl: ["Mtl", "Dl"],
-    nicotine_percentage: [0, 3, 6, 9, 12, 18],
+    nicotine_percentage: [0, 3, 6, 9, 12,16, 18,20,25,30,50],
   };
   return options[key].map((value) => ({ value, label: value }));
 }

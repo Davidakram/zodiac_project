@@ -158,6 +158,7 @@ const SellingPage = () => {
       console.log(error);
     } finally {
       setLoading(false);
+      setSellPrice("")
     }
     setShowSellModal(false);
   };
@@ -303,7 +304,7 @@ const SellingPage = () => {
               name="product_size"
             >
               <MenuItem value="">All</MenuItem>
-              {generateSelectOptions(["30 ml", "60 ml", "100 ml", "150 ml"])}
+              {generateSelectOptions(["15 ml","30 ml", "60 ml", "100 ml", "150 ml"])}
             </Select>
           </FormControl>
         </ThemeProvider>
@@ -317,7 +318,7 @@ const SellingPage = () => {
               name="nicotine_percentage"
             >
               <MenuItem value="">All</MenuItem>
-              {generateSelectOptions([0, 3, 6, 9, 12, 18])}
+              {generateSelectOptions([0, 3, 6, 9, 12,16, 18,20,25,30,50])}
             </Select>
           </FormControl>
         </ThemeProvider>

@@ -48,7 +48,6 @@ const ProductsPage = () => {
 
   const handleProcessRowUpdate = async (newRow) => {
     try {
-      console.log(newRow);
       // Send the updated row to the backend
       await axios.put(
         `http://127.0.0.1:5000/api/productmodify/${newRow.id}`,

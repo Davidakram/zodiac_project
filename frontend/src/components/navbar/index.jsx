@@ -21,7 +21,6 @@ import UserContext from "../context";
 const NavBar = () => {
   const history = useHistory();
   const { userRole, setUserRole } = React.useContext(UserContext);
-  console.log(userRole);
   const [show, setShow] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -31,6 +30,7 @@ const NavBar = () => {
   };
 
   const handleClose = () => {
+    
     setAnchorEl(null);
   };
   const logout = () => {
@@ -45,7 +45,7 @@ const NavBar = () => {
   //     signOut(auth)
   //       .then(() => {
   //         history.push("/login");
-  //         Cookies.remove("User_Id");
+  //         Cookies.removzodiac_tokene("User_Id");
   //       })
   //       .catch((error) => {
   //         console.error("Error during logout:", error);
@@ -80,7 +80,6 @@ const NavBar = () => {
           >
             <MenuIcon />
           </IconButton>
-          {userRole && (
             <Menu
               id="menu-appbar"
               anchorEl={anchorEl}
@@ -116,7 +115,7 @@ const NavBar = () => {
                 Logout
               </MenuItem>
             </Menu>
-          )}
+          
 
           {/* Logout Button */}
           {/* <Button color="inherit" onClick={handleLogout}>

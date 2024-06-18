@@ -8,7 +8,7 @@ app = Flask(__name__)
 api = Api(app) 
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:david@localhost:5432/zodiac'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:password@localhost:5432/zodiac'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = "db2b508cf953d8914dd0b66a3d5147d8"
 db = SQLAlchemy(app)
@@ -136,6 +136,8 @@ class ProductsModifications(Resource):
         
         product.product_type = data.get('product_type', product.product_type)
         product.original_price = data.get('original_price', product.original_price)
+        if product.original_price == "-":
+            product.original_price=0
         product.selling_price = data.get('selling_price', product.selling_price)
         product.product_name = data.get('product_name', product.product_name)
         product.product_count = data.get('total_count', product.product_count)
@@ -182,6 +184,8 @@ class ProductSearchResource(Resource):
         return {'products': products_list}, 200
     
 class SellingProducts(Resource):
+
+        
     def post(self,id):
         data=request.get_json()
         try:
@@ -193,7 +197,6 @@ class SellingProducts(Resource):
             else:
                 return {"message":"Product out of stock"},400
             selling_price=int(data.get("selling_price"))
-            print(selling_price)
             
             product_profit=(selling_price-product.original_price)
             sale=Sale(product_id=id,quantity_sold=1,sale_date=datetime.utcnow(), total_sale_amount=selling_price,product_profit=product_profit)
@@ -205,7 +208,26 @@ class SellingProducts(Resource):
             return {"message":str(e)},500
 
 
+
+class DeleteSale(Resource):
+    def delete(self,id):
+        sale=Sale.query.get(id)
+        if sale:
+            product_id=sale.product_id
+            product=Product.query.get(product_id)
+            if product:
+                product.product_count+=1
+                db.session.commit()
+                db.session.delete(sale)
+                db.session.commit()
+                return {"message": "Sale record deleted and product count updated successfully."}, 200
+
+            else:
+                return{"message":"No Product Avaliable"}
+        else:
+            return{"message":"No sale found"}
 class TodaySales(Resource):
+    
     def get(self):
         current_date = date.today()
         sales = Sale.query.filter(Sale.sale_date == current_date).all()
@@ -242,6 +264,7 @@ class GetSalesByDate(Resource):
                 "product_name":product.product_name,
                 "product_type":product.product_type,
                 "product_size":product.product_size,
+                "product_original_price":float(product.original_price),
                 "nicotine_percentage":product.nicotine_percentage,
                 "mtl_or_dl":product.mtl_or_dl,
                 "quantity_sold":sale.quantity_sold,
@@ -279,5 +302,5 @@ api.add_resource(ProductSearchResource,"/api/productsearch")
 api.add_resource(SellingProducts,"/api/selling/<int:id>")
 api.add_resource(TodaySales,"/api/sales")
 api.add_resource(ProductsNames,"/api/productsnames")
-
+api.add_resource(DeleteSale,"/api/deletesale/<int:id>")
 api.add_resource(GetSalesByDate,"/api/getsalesbydate")

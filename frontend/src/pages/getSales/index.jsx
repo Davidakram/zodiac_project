@@ -50,33 +50,35 @@ const GetSales = () => {
       // Add overrides for other components as needed
     },
   });
-
+const getSalesFunction = async ()=>{
+  const formattedDates = {
+    startDate: dates.startDate
+      ? new Date(dates.startDate).toLocaleDateString("en-US")
+      : null,
+    endDate: dates.endDate
+      ? new Date(dates.endDate).toLocaleDateString("en-US")
+      : null,
+  };
+  const response = await axios.post(
+    "http://127.0.0.1:5000/api/getsalesbydate",
+    formattedDates
+  );
+  const formattedSales = response.data.sales.map((sale) => {
+    return Object.fromEntries(
+      Object.entries(sale).map(([key, value]) => [key, value || "-"])
+    );
+  });
+  setSales(
+    formattedSales.map((sales) => ({
+      ...sales,
+      id: sales.sale_id,
+    }))
+  );
+}
   const handleGetSales = async () => {
-    const formattedDates = {
-      startDate: dates.startDate
-        ? new Date(dates.startDate).toLocaleDateString("en-US")
-        : null,
-      endDate: dates.endDate
-        ? new Date(dates.endDate).toLocaleDateString("en-US")
-        : null,
-    };
-    console.log("Selected Dates:", formattedDates);
+
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:5000/api/getsalesbydate",
-        formattedDates
-      );
-      const formattedSales = response.data.sales.map((sale) => {
-        return Object.fromEntries(
-          Object.entries(sale).map(([key, value]) => [key, value || "-"])
-        );
-      });
-      setSales(
-        formattedSales.map((sales) => ({
-          ...sales,
-          id: sales.sale_id,
-        }))
-      );
+     await getSalesFunction()
     } catch (e) {
       toast.error("Error while getting sales , please try again");
       console.log(e);
@@ -96,9 +98,28 @@ const GetSales = () => {
     },
 
     { field: "quantity_sold", headerName: "Quantity Sold", flex: 1 },
+        { field: "product_original_price", headerName: "Original Price", flex: 1 },
+
     { field: "total_price", headerName: "Total Price", flex: 1 },
     { field: "sale_date", headerName: "Date", flex: 1 },
-  ];
+    {
+      field: "delete",
+      headerName: "Delete",
+      flex: 1,
+      renderCell: (params) => {
+          return <button type="btn" className="btn btn-outline-danger" onClick={() => handleDelete(params.row.id)}>Delete</button>;
+      }
+  }  ];
+  const handleDelete = async (id) => {
+try{
+  const response = await axios.delete(`http://127.0.0.1:5000/api/deletesale/${id}`)
+toast.success("Sale deleted !")
+getSalesFunction()
+}
+catch(e){
+  console.log(e)
+}
+};
 
   const isButtonDisabled = !dates.startDate || !dates.endDate;
 
@@ -110,8 +131,10 @@ const GetSales = () => {
   };
   const calculateTotalMoney = (sales) => {
     let totalMoney = 0;
+    
     sales.forEach((sale) => {
-      totalMoney += sale.total_price;
+      if (sale.total_price >0){totalMoney +=sale.total_price}
+      
     });
     return totalMoney.toFixed(0);
   };
@@ -119,7 +142,9 @@ const GetSales = () => {
   const calculateTotalProfit = (sales) => {
     let totalProfit = 0;
     sales.forEach((sale) => {
-      totalProfit += sale.product_profit;
+     
+      if (sale.product_profit >0){totalProfit +=sale.product_profit}
+    
     });
     return totalProfit.toFixed(0); // toFixed(2) is used to display the total with 2 decimal places
   };

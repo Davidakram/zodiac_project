@@ -54,7 +54,7 @@ function LoginPage() {
             Cookies.set("zodiac_token", data.token);
             const { user_name } = jwtDecode(data.token);
             setUserRole(user_name);
-
+            
             toast.success(
               `Welcome Mr. ${
                 user_name.charAt(0).toUpperCase() +
