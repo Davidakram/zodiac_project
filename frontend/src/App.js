@@ -12,6 +12,7 @@ import LoginPage from "./pages/login";
 import PrivateRoute from "./components/routes";
 import { UserProvider } from "./components/context";
 import Inventory from "./pages/inventory";
+import PrivateRouteWithUserCheck from "./components/routes/administrator";
 
 function App() {
   return (
@@ -23,11 +24,27 @@ function App() {
             {" "}
             <NavBar />
             <Switch>
-              <PrivateRoute exact path="/add_product" component={ProductForm} />
-              <PrivateRoute exact path="/products" component={ProductsPage} />
+              <PrivateRouteWithUserCheck
+                exact
+                path="/add_product"
+                component={ProductForm}
+              />
+              <PrivateRouteWithUserCheck
+                exact
+                path="/products"
+                component={ProductsPage}
+              />
               <PrivateRoute exact path="/" component={SellingPage} />
-              <PrivateRoute exact path="/getsales" component={GetSales} />
-              <PrivateRoute exact path="/inventory" component={Inventory} />
+              <PrivateRouteWithUserCheck
+                exact
+                path="/getsales"
+                component={GetSales}
+              />
+              <PrivateRouteWithUserCheck
+                exact
+                path="/inventory"
+                component={Inventory}
+              />
 
               <Route exact path="/login" component={LoginPage} />
             </Switch>

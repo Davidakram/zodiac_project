@@ -3,6 +3,8 @@ import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import "../../components/styles/sellingPage.css";
+import Cookies from "js-cookie";
+
 import axios from "axios";
 import {
   Box,
@@ -18,9 +20,10 @@ import {
 import { toast } from "react-toastify";
 import { Form } from "react-bootstrap";
 import { useUser } from "../../components/context";
+import { jwtDecode } from "jwt-decode";
 
 const SellingPage = () => {
-  const { user } = useUser();
+  const [user_name, setUserName] = useState("");
 
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -79,7 +82,10 @@ const SellingPage = () => {
       setSales([]);
     }
   };
+
   useEffect(() => {
+    const { user_name } = jwtDecode(Cookies.get("zodiac_token"));
+    setUserName(user_name);
     fetchSalesForToday();
   }, [loading]);
 
@@ -445,7 +451,7 @@ const SellingPage = () => {
 
       <Box>
         <div className="w-100 text-center">
-          {user.user_name === "Youssef" && (
+          {user_name === "Youssef" && (
             <button
               className=" mb-4 mt-5 add-button"
               type="button"

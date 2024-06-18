@@ -11,9 +11,12 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
 import { useUser } from "../context";
+import { jwtDecode } from "jwt-decode";
+import Cookies from "js-cookie";
 
 const NavBar = () => {
   const { user, logout } = useUser();
+  const [user_name, setUserName] = useState("");
   const [show, setShow] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -27,6 +30,11 @@ const NavBar = () => {
 
   const location = useLocation();
   useEffect(() => {
+    if (Cookies.get("zodiac_token")) {
+      const { user_name } = jwtDecode(Cookies.get("zodiac_token"));
+      setUserName(user_name);
+    }
+
     if (location.pathname === "/login") {
       setShow(false);
     } else {
@@ -74,7 +82,7 @@ const NavBar = () => {
               onClick={handleClose}
               component={Link}
               to="/add_product"
-              className={user.user_name === "Youssef" ? "d-block" : "d-none"}
+              className={user_name === "Youssef" ? "d-block" : "d-none"}
             >
               Add Product
             </MenuItem>
@@ -85,7 +93,7 @@ const NavBar = () => {
               onClick={handleClose}
               component={Link}
               to="/products"
-              className={user.user_name === "Youssef" ? "d-block" : "d-none"}
+              className={user_name === "Youssef" ? "d-block" : "d-none"}
             >
               Products Available
             </MenuItem>
@@ -93,7 +101,7 @@ const NavBar = () => {
               onClick={handleClose}
               component={Link}
               to="/getsales"
-              className={user.user_name === "Youssef" ? "d-block" : "d-none"}
+              className={user_name === "Youssef" ? "d-block" : "d-none"}
             >
               Sales by Date
             </MenuItem>
@@ -101,7 +109,7 @@ const NavBar = () => {
               onClick={handleClose}
               component={Link}
               to="/inventory"
-              className={user.user_name === "Youssef" ? "d-block" : "d-none"}
+              className={user_name === "Youssef" ? "d-block" : "d-none"}
             >
               Inventory
             </MenuItem>
