@@ -291,6 +291,7 @@ const SellingPage = () => {
               <MenuItem value="">All</MenuItem>
               {generateSelectOptions([
                 "Liquid",
+                "kit",
                 "Tank",
                 "Pod",
                 "Mod",
