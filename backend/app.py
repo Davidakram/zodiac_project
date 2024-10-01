@@ -49,6 +49,7 @@ class Sale(db.Model):
     total_sale_amount = db.Column(db.Numeric(10, 2), nullable=False)
     product_profit=db.Column(db.Numeric(10, 2), nullable=False)
     product = db.relationship('Product', backref=db.backref('sales', lazy=True))
+    user_name=db.Column(db.String(20),nullable=False)
 
 
 class Login(Resource):
@@ -221,7 +222,7 @@ class ProductSearchResource(Resource):
                 'nicotine_percentage': product.nicotine_percentage,
                 'selling_price': float(product.selling_price),    
                 'total_count': product.product_count,
-                'dealer':product.dealer
+                'dealer':product.dealer,
             })
         # Convert the products to a JSON response
         return {'products': products_list}, 200
@@ -240,9 +241,9 @@ class SellingProducts(Resource):
             else:
                 return {"message":"Product out of stock"},400
             selling_price=int(data.get("selling_price"))
-            
+            user_name=data.get("user_name")
             product_profit=(selling_price-product.original_price)
-            sale=Sale(product_id=id,quantity_sold=1,sale_date=datetime.utcnow(), total_sale_amount=selling_price,product_profit=product_profit)
+            sale=Sale(product_id=id,quantity_sold=1,sale_date=datetime.utcnow(), user_name=user_name,total_sale_amount=selling_price,product_profit=product_profit)
             db.session.add(sale)
             db.session.commit()
             return{"message":"Product was sold Successfully "},200
@@ -287,6 +288,7 @@ class TodaySales(Resource):
                 "quantity_sold":sale.quantity_sold,
                 "total_price":float(sale.total_sale_amount),
                 "product_profit":float(sale.product_profit),
+                "user_name":sale.user_name
 
             }
             formatted_sales.append(formatted_sale)
@@ -314,7 +316,7 @@ class GetSalesByDate(Resource):
                 "total_price":float(sale.total_sale_amount),
                 "sale_date": sale.sale_date.strftime('%Y-%m-%d'),
                 "product_profit":float(sale.product_profit),
-                                        
+                "user_name":sale.user_name       
                                         }
             formatted_sales.append(formatted_sale)
         return {"sales":formatted_sales},200    

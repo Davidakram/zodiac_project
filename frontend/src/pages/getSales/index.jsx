@@ -85,6 +85,7 @@ const GetSales = () => {
     }
   };
   const Salescolumns = [
+    {field:"user_name",headerName:"Seller",flex:1},
     { field: "product_name", headerName: "Product Name", flex: 1 },
     { field: "product_type", headerName: "Type", flex: 1 },
     { field: "mtl_or_dl", headerName: "Mtl&Dl", flex: 1 },

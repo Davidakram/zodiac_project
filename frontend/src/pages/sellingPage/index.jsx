@@ -90,6 +90,7 @@ const SellingPage = () => {
   }, [loading]);
 
   const Salescolumns = [
+    {field:"user_name",headerName:"Seller",flex:1},
     { field: "product_name", headerName: "Product Name", flex: 1 },
     { field: "product_type", headerName: "Type", flex: 1 },
     { field: "mtl_or_dl", headerName: "Mtl&Dl", flex: 1 },
@@ -158,7 +159,7 @@ const SellingPage = () => {
     try {
       const response = await axios.post(
         `http://127.0.0.1:5000/api/selling/${selectedProduct.id}`,
-        { selling_price: sellPrice || selectedProduct.selling_price }
+        { selling_price: sellPrice || selectedProduct.selling_price,user_name:jwtDecode(Cookies.get("zodiac_token")).user_name }
       );
       toast.success("Product Sold successfully");
       fetchData(searchCriteria);
