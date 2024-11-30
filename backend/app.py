@@ -87,7 +87,7 @@ class GroupedProducts(Resource):
                 Product.product_size,
                 Product.mtl_or_dl,
                 Product.nicotine_percentage
-            )
+            ).order_by(Product.product_name)
             .all()
         )
 
@@ -119,9 +119,7 @@ class ProductsProccess(Resource):
         product_name = data.get('product_name')
         product_count = data.get('product_count')
         product_size = data.get('product_size')
-        dealer=data.get('dealer')
         nicotine_percentage = data.get('nicotine_percentage')
-        date_added = data.get('date_added')
 
         
         try:
@@ -135,9 +133,9 @@ class ProductsProccess(Resource):
                 product_count=product_count,
                 product_size=product_size,
                 nicotine_percentage=nicotine_percentage,
-                date_added=date_added,
+                date_added=None,
                 mtl_or_dl=mtl_or_dl,
-                dealer=dealer
+                dealer=None
             )
             db.session.add(new_product)
             db.session.commit()
@@ -163,7 +161,6 @@ class ProductsProccess(Resource):
                 'original_price': float(product.original_price),  
                 'selling_price': float(product.selling_price),    
                 'total_count': product.product_count,
-                'dealer':product.dealer
             })
 
         return {'products': products_list}, 200
@@ -186,7 +183,6 @@ class ProductsModifications(Resource):
         product.product_size = data.get('product_size', product.product_size)
         product.nicotine_percentage = data.get('nicotine_percentage', product.nicotine_percentage)
         product.mtl_or_dl = data.get('mtl_or_dl', product.mtl_or_dl)
-        product.dealer=data.get('dealer',product.dealer)
 
         try: 
             db.session.commit()
@@ -222,7 +218,6 @@ class ProductSearchResource(Resource):
                 'nicotine_percentage': product.nicotine_percentage,
                 'selling_price': float(product.selling_price),    
                 'total_count': product.product_count,
-                'dealer':product.dealer,
             })
         # Convert the products to a JSON response
         return {'products': products_list}, 200
@@ -320,6 +315,7 @@ class GetSalesByDate(Resource):
                                         }
             formatted_sales.append(formatted_sale)
         return {"sales":formatted_sales},200    
+        
 class ProductsNames(Resource):
     def get(self):
         # Query distinct product names
@@ -327,13 +323,9 @@ class ProductsNames(Resource):
             Product.product_id, Product.product_name
         ).distinct(Product.product_name).all()
 
-        # Query distinct dealer names
-        distinct_dealer_names = db.session.query(
-            Product.product_id, Product.dealer
-        ).distinct(Product.dealer).all()
+
 
         products_names_list = []
-        dealers_names_list = []
 
         for product in distinct_product_names:
             formatted_product = {
@@ -342,16 +334,10 @@ class ProductsNames(Resource):
             }
             products_names_list.append(formatted_product)
 
-        for dealer in distinct_dealer_names:
-            formatted_dealer = {
-                "id": dealer.product_id,
-                "dealer": dealer.dealer
-            }
-            dealers_names_list.append(formatted_dealer)
+
 
         return {
             "products_names_list": products_names_list,
-            "dealers_names_list": dealers_names_list
         }, 200
 
 api.add_resource(Login,"/api/login")    

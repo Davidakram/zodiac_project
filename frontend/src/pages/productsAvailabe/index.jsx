@@ -7,7 +7,24 @@ import { toast } from "react-toastify";
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const getRandomColor = () => {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
 
+  const [boxShadowColor, setBoxShadowColor] = useState(getRandomColor());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBoxShadowColor(getRandomColor());
+    }, 10000); // Change color every 10 seconds
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
   const columns = [
     { field: "product_name", headerName: "Name", flex: 0.5, editable: true },
     { field: "product_type", headerName: "Type", flex: 0.5, editable: true },
@@ -29,12 +46,6 @@ const ProductsPage = () => {
     {
       field: "selling_price",
       headerName: "Selling Price",
-      flex: 0.5,
-      editable: true,
-    },
-    {
-      field: "dealer",
-      headerName: "Dealer Name",
       flex: 0.5,
       editable: true,
     },
@@ -92,11 +103,11 @@ const ProductsPage = () => {
   }, []);
 
   if (loading) {
-    return <CircularProgress />;
+    return ;
   }
 
   return (
-    <Box
+    <>{loading ?<CircularProgress />:(    <Box
       sx={{
         margin: "20px auto",
         width: "90%",
@@ -144,7 +155,8 @@ const ProductsPage = () => {
                 color: `white !important`,
               },
               "& .css-az8st9-MuiDataGrid-root.MuiDataGrid-autoHeight": {
-                boxShadow: "0px 0px 25px 25px #7ffaffbd",
+                boxShadow: `0px 0px 25px 25px ${boxShadowColor}`,
+
               },
               "& .css-az8st9-MuiDataGrid-root .MuiDataGrid-withBorderColor ": {
                 backgroundColor: "inherit !important",
@@ -176,7 +188,8 @@ const ProductsPage = () => {
           </Box>
         </Grid>
       </Grid>
-    </Box>
+    </Box>)}</>
+
   );
 };
 

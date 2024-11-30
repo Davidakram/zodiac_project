@@ -29,8 +29,6 @@ const initialValues = {
   product_size: "",
   nicotine_percentage: "",
   mtl_or_dl: "",
-  dealer: "",
-  date_added: null,
 };
 
 // Validation schema using Yup
@@ -49,14 +47,27 @@ const ProductSchema = Yup.object().shape({
   product_count: Yup.number()
     .min(0, "Must be a positive number")
     .required("Required"),
-  product_size: Yup.string(),
-  nicotine_percentage: Yup.number(),
-  date_added: Yup.date("Enter a Date"),
-  dealer: Yup.string().required("Required"),
+
+  product_size: Yup.string()
+    .test('size-required', 'Required if product type is Liquid', function (value) {
+      const { product_type } = this.parent;
+      return product_type !== 'Liquid' || (value && value.length > 0);
+    }),
+  nicotine_percentage: Yup.number()
+    .test('nicotine-required', 'Required if product type is Liquid', function (value) {
+      const { product_type } = this.parent;
+      return product_type !== 'Liquid' || (value !== undefined && value !== null);
+    }),
+  mtl_or_dl: Yup.string()
+    .test('mtl-or-dl-required', 'Required if product type is Liquid', function (value) {
+      const { product_type } = this.parent;
+      return product_type !== 'Liquid' || (value && value.length > 0);
+    }),
 });
 
 const ProductForm = () => {
   const history = useHistory();
+  
 
   const theme = createTheme({
     components: {
@@ -128,8 +139,7 @@ const ProductForm = () => {
       );
 
       setProductNames(response.data.products_names_list);
-      setDealerNames(response.data.dealers_names_list);
-    } catch (error) {
+   } catch (error) {
       console.log(error);
     }
   };
@@ -162,65 +172,7 @@ const ProductForm = () => {
               {Object.keys(initialValues).map((key) => (
                 <Grid item xs={12} key={key}>
                   <ThemeProvider theme={theme}>
-                    {key === "date_added" ? (
-                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <Field fullWidth name="date_added">
-                          {({ field }) => (
-                            <DatePicker
-                              {...field}
-                              label="Date Added"
-                              inputFormat="MM/dd/yyyy"
-                              error={errors.date_added && touched.date_added}
-                              helperText={
-                                touched.date_added && errors.date_added
-                              }
-                              onBlur={handleBlur}
-                              onChange={(newValue) => {
-                                handleChange({
-                                  target: {
-                                    name: "date_added",
-                                    value: newValue,
-                                  },
-                                });
-                              }}
-                            />
-                          )}
-                        </Field>
-                      </LocalizationProvider>
-                    ) : key === "dealer" ? (
-                      <Autocomplete
-                        freeSolo
-                        options={dealerNames}
-                        getOptionLabel={(option) => {
-                          return typeof option === "string"
-                            ? option
-                            : option.dealer;
-                        }}
-                        onChange={(event, newValue) => {
-                          handleChange({
-                            target: {
-                              name: "dealer",
-                              value: newValue
-                                ? typeof newValue === "string"
-                                  ? newValue
-                                  : newValue.dealer
-                                : "",
-                            },
-                          });
-                        }}
-                        onBlur={handleBlur}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="outlined"
-                            label="Dealer Name"
-                            name="dealer"
-                            error={errors.dealer && touched.dealer}
-                            helperText={touched.dealer && errors.dealer}
-                          />
-                        )}
-                      />
-                    ) : key === "product_name" ? (
+                    { key === "product_name" ? (
                       <Autocomplete
                         freeSolo
                         options={productNames}

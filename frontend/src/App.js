@@ -13,6 +13,7 @@ import PrivateRoute from "./components/routes";
 import { UserProvider } from "./components/context";
 import Inventory from "./pages/inventory";
 import PrivateRouteWithUserCheck from "./components/routes/administrator";
+import MonthlySales from "./pages/monthlySales";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
                 path="/products"
                 component={ProductsPage}
               />
+
               <PrivateRoute exact path="/" component={SellingPage} />
               <PrivateRouteWithUserCheck
                 exact
@@ -45,6 +47,7 @@ function App() {
                 path="/inventory"
                 component={Inventory}
               />
+              <PrivateRoute exact path="/monthlySales" component={MonthlySales}/>
 
               <Route exact path="/login" component={LoginPage} />
             </Switch>

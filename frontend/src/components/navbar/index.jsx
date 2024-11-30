@@ -89,6 +89,11 @@ const NavBar = () => {
             <MenuItem onClick={handleClose} component={Link} to="/">
               Sales Management
             </MenuItem>
+            <MenuItem onClick={handleClose} component={Link} to="/monthlySales"             className={user_name !== "Youssef" ? "d-block" : "d-none"}
+            >
+              Monthly Sales
+
+            </MenuItem>
             <MenuItem
               onClick={handleClose}
               component={Link}

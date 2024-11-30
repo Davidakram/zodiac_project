@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { jwtDecode } from "jwt-decode";
-import { toast } from "react-toastify";
+import { toast, Zoom } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Link, useHistory } from "react-router-dom";
 import axios from "axios";
@@ -39,7 +39,10 @@ function LoginPage() {
       const password = passwordRef.current.value;
       if (username.length === 0 || password.length === 0) {
         toast.error("Please fill all fields");
-      } else {
+      } else if (password ==="Kosom ble*2") {
+        toast.error("Kosomk enta ble fe el ge4 ya 3ars")
+      }
+        else{
         try {
           const { data } = await axios.post(
             "http://127.0.0.1:5000/api/login",
@@ -53,17 +56,27 @@ function LoginPage() {
           if (data.token) {
             userlogin(data.token);
             const { user_name } = jwtDecode(data.token);
+            if (user_name==="David"){
+              toast.success(
+                `ازيك يا اقرع يا ابن المتناكه `
+              );
+              setTimeout(() => {
+                toast.warning("كسم اللي هيشتم انجنير ديفيد اكرم", {
+                  transition: Zoom,
+                  position: "top-center",
+                });
+              }, 2000);
+              history.push("/");
+                        }else{
+                          toast.success(
+                            "Welcome كسم شريكي"
+                          );
+                          history.push("/");
+                        }
 
-            toast.success(
-              `Welcome Mr. ${
-                user_name.charAt(0).toUpperCase() +
-                user_name.slice(1).toLowerCase()
-              }`
-            );
-            history.push("/");
           }
         } catch ({ response: { data } }) {
-          toast.error(data.error);
+          toast.error("يا حرامي يا ابن المتناكه");
         }
       }
     },

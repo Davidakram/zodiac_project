@@ -32,6 +32,24 @@ const SellingPage = () => {
   const [loading, setLoading] = useState(false);
   const [showSalesTable, setShowSalesTable] = useState(false);
   const [sellPrice, setSellPrice] = useState("");
+  const getRandomColor = () => {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
+
+  const [boxShadowColor, setBoxShadowColor] = useState(getRandomColor());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBoxShadowColor(getRandomColor());
+    }, 10000); // Change color every 10 seconds
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
 
   const [searchCriteria, setSearchCriteria] = useState({
     product_type: "",
@@ -105,7 +123,34 @@ const SellingPage = () => {
     { field: "quantity_sold", headerName: "Quantity Sold", flex: 1 },
     { field: "total_price", headerName: "Total Price", flex: 1 },
     { field: "product_profit", headerName: "Productprofit", flex: 1 },
+    {
+      field: "delete",
+      headerName: "Delete",
+      flex: 1,
+      renderCell: (params) => {
+        return (
+          <button
+            type="btn"
+            className="btn btn-outline-danger"
+            onClick={() => handleDelete(params.row.id)}
+          >
+            Delete
+          </button>
+        );
+      },
+    },
   ];
+  const handleDelete = async (id) => {
+    try {
+      const response = await axios.delete(
+        `http://127.0.0.1:5000/api/deletesale/${id}`
+      );
+      toast.success("جدع يا ابن المتناكه");
+      fetchSalesForToday();
+    } catch (e) {
+      console.log(e);
+    }
+  };
   // Function to handle selling a product
   const handleSellProduct = (product) => {
     setSelectedProduct(product);
@@ -161,7 +206,7 @@ const SellingPage = () => {
         `http://127.0.0.1:5000/api/selling/${selectedProduct.id}`,
         { selling_price: sellPrice || selectedProduct.selling_price,user_name:jwtDecode(Cookies.get("zodiac_token")).user_name }
       );
-      toast.success("Product Sold successfully");
+      toast.success("شاطر يا كسمك");
       fetchData(searchCriteria);
     } catch (error) {
       toast.error("Error Selling this product");
@@ -200,6 +245,8 @@ const SellingPage = () => {
     }
   };
 
+  const [debouncedSearchCriteria, setDebouncedSearchCriteria] = useState(searchCriteria);
+
   const handleSearchChange = (e) => {
     const { name, value } = e.target;
     setSearchCriteria((prevState) => ({
@@ -207,10 +254,19 @@ const SellingPage = () => {
       [name]: value,
     }));
   };
-  // useEffect to fetch products when component mounts
   useEffect(() => {
-    fetchData(searchCriteria);
+    const handler = setTimeout(() => {
+      setDebouncedSearchCriteria(searchCriteria);
+    }, 300);
+
+   
+    return () => {
+      clearTimeout(handler);
+    };
   }, [searchCriteria]);
+  useEffect(() => {
+    fetchData(debouncedSearchCriteria);
+  }, [debouncedSearchCriteria]);
   const generateSelectOptions = (values) => {
     return values.map((value, index) => (
       <MenuItem key={index} value={value}>
@@ -393,7 +449,7 @@ const SellingPage = () => {
             color: `white !important`,
           },
           "& .css-az8st9-MuiDataGrid-root.MuiDataGrid-autoHeight": {
-            boxShadow: "0px 0px 25px 25px #7ffaffbd",
+            boxShadow: `0px 0px 25px 25px ${boxShadowColor} !important`,
           },
           "& .css-az8st9-MuiDataGrid-root .MuiDataGrid-withBorderColor ": {
             backgroundColor: "inherit !important",
