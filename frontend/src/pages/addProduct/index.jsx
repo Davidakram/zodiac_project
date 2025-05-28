@@ -282,7 +282,7 @@ function getSelectMenuItems(key) {
     ],
     product_size: ["15 ml","30 ml", "60 ml", "100 ml", "150 ml"],
     mtl_or_dl: ["Mtl", "Dl"],
-    nicotine_percentage: [0, 3, 6, 9, 12,16, 18,20,25,30,50],
+    nicotine_percentage: [0,3,6,7,9,12,16,18,20,25,27.5,30,45,50,60],
   };
   return options[key].map((value) => ({ value, label: value }));
 }

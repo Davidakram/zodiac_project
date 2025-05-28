@@ -395,7 +395,7 @@ const SellingPage = () => {
               name="nicotine_percentage"
             >
               <MenuItem value="">All</MenuItem>
-              {generateSelectOptions([0, 3, 6, 9, 12, 16, 18, 20, 25, 30, 50])}
+              {generateSelectOptions([0, 3, 6,7, 9, 12, 16, 18, 20, 25, 27.5 , 30, 45, 50 , 60])}
             </Select>
           </FormControl>
         </ThemeProvider>

@@ -58,7 +58,7 @@ function LoginPage() {
             const { user_name } = jwtDecode(data.token);
             if (user_name==="David"){
               toast.success(
-                `ازيك يا اقرع يا ابن المتناكه `
+                `Welcome يا اقرع    `
               );
               setTimeout(() => {
                 toast.warning("كسم اللي هيشتم انجنير ديفيد اكرم", {

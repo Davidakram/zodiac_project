@@ -101,6 +101,7 @@ const GetSales = () => {
     { field: "product_original_price", headerName: "Original Price", flex: 1 },
 
     { field: "total_price", headerName: "Total Price", flex: 1 },
+    {field:"product_profit",headerName:"Profit",flex:1},
     { field: "sale_date", headerName: "Date", flex: 1 },
     {
       field: "delete",
